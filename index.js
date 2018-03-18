@@ -10,6 +10,7 @@ var client = new Twitter({
 
 var params = {screen_name: 'pineapples786', count: 100};
 var tags = [];
+var locations = [];
 
 client.get('statuses/user_timeline/', params, function(error, tweets, response){
 	if(error){
@@ -23,4 +24,26 @@ client.get('statuses/user_timeline/', params, function(error, tweets, response){
 		}
 	});
 	console.log(`Found ${tags.length} tags!`);
+	for(t in tags){
+		if(t < tags.length){
+			console.log(`Analysing tag ${t}: ${tags[t]}`);
+			client.get('search/tweets/', {q: `#${tags[t]}`, include_entities: true, count: 100}, function(error, tweets, response){
+				if(error){
+					throw error;
+				}
+				tweets.statuses.forEach((twt) => {
+					var a = twt.user.time_zone;
+					if(locations[a]){
+						locations[a] += 1;
+					} else {
+						locations[a] = 1;
+					}
+				});
+				locations.sort((a,b) => {
+					return b - a;
+				});
+				console.log(locations);
+			});
+		}
+	}
 });
